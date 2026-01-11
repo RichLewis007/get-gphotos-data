@@ -60,6 +60,7 @@ from .dialogs.preferences import PreferencesDialog
 from .widgets.calendar_demo import CalendarDemo
 from .widgets.controls_demo import ControlsDemo
 from .widgets.dialogs_demo import DialogsDemo
+from .widgets.google_photos import GooglePhotosView
 from .widgets.graphics_demo import GraphicsDemo
 from .widgets.table_view_demo import TableViewDemo
 from .widgets.text_editor_demo import TextEditorDemo
@@ -320,7 +321,11 @@ class MainWindow(QMainWindow):
         # Create tab widget to organize different content areas
         self.tab_widget = QTabWidget(self)
 
-        # Tab 1: Main/File operations (original UI)
+        # Tab 1: Google Photos (main feature)
+        google_photos_view = GooglePhotosView(self)
+        self.tab_widget.addTab(google_photos_view, "Google Photos")
+
+        # Tab 2: Main/File operations (original UI)
         self.ui = load_ui("main_window.ui", self)
         self.tab_widget.addTab(self.ui, "Main")
 
