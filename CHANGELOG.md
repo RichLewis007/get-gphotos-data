@@ -35,9 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Corrected OAuth scope to use current API-compliant scope (`photoslibrary.readonly.appcreateddata`)
-- Updated all references to deprecated scope in code and documentation
-
-### Documentation
+- Updated all references to deprecated scope in code and documentation### Documentation
 - Added complete API reference documentation covering all endpoints and data structures
 - Added detailed authentication setup instructions
 - Added troubleshooting guide for common issues (403 errors, authentication problems)

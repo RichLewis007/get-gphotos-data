@@ -94,13 +94,17 @@ class GooglePhotosAuth:
         if self.credentials and self.credentials.valid:
             self._save_credentials()
 
+        if not self.credentials:
+            raise RuntimeError("Authentication failed: no credentials obtained")
         return self.credentials
 
     def _run_oauth_flow(self) -> None:
         """Run the OAuth 2.0 flow to obtain new credentials."""
         self.log.info("Starting OAuth 2.0 flow...")
         flow = InstalledAppFlow.from_client_secrets_file(str(self.credentials_path), SCOPES)
-        self.credentials = flow.run_local_server(port=0, open_browser=True)
+        creds = flow.run_local_server(port=0, open_browser=True)
+        # Type assertion: run_local_server returns Credentials
+        self.credentials = creds  # type: ignore[assignment]
         self.log.info("OAuth flow completed successfully")
 
     def _save_credentials(self) -> None:
@@ -144,7 +148,9 @@ class GooglePhotosAuth:
         """Revoke credentials and delete token file."""
         if self.credentials:
             try:
-                self.credentials.revoke(Request())
+                # Check if revoke method exists (not all credential types have it)
+                if hasattr(self.credentials, "revoke"):
+                    self.credentials.revoke(Request())  # type: ignore[attr-defined]
             except Exception as e:
                 self.log.warning("Failed to revoke credentials: %s", e)
 

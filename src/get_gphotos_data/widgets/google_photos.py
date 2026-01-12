@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
@@ -60,53 +60,64 @@ class GooglePhotosView(QWidget):
         layout.addWidget(ui_widget)
 
         # Find widgets
-        self.auth_status_label = ui_widget.findChild(QLabel, "authStatusLabel")
-        if self.auth_status_label is None:
+        auth_status_label = ui_widget.findChild(QLabel, "authStatusLabel")
+        if auth_status_label is None:
             raise RuntimeError("authStatusLabel not found in google_photos_view.ui")
+        self.auth_status_label = cast(QLabel, auth_status_label)
             
-        self.authenticate_button = ui_widget.findChild(QPushButton, "authenticateButton")
-        if self.authenticate_button is None:
+        authenticate_button = ui_widget.findChild(QPushButton, "authenticateButton")
+        if authenticate_button is None:
             raise RuntimeError("authenticateButton not found in google_photos_view.ui")
+        self.authenticate_button = cast(QPushButton, authenticate_button)
             
-        self.refresh_button = ui_widget.findChild(QPushButton, "refreshButton")
-        if self.refresh_button is None:
+        refresh_button = ui_widget.findChild(QPushButton, "refreshButton")
+        if refresh_button is None:
             raise RuntimeError("refreshButton not found in google_photos_view.ui")
+        self.refresh_button = cast(QPushButton, refresh_button)
             
-        self.data_tabs = ui_widget.findChild(QTabWidget, "dataTabs")
-        if self.data_tabs is None:
+        data_tabs = ui_widget.findChild(QTabWidget, "dataTabs")
+        if data_tabs is None:
             raise RuntimeError("dataTabs not found in google_photos_view.ui")
+        self.data_tabs = cast(QTabWidget, data_tabs)
         
         # Media Items tab
-        self.media_items_count_label = ui_widget.findChild(QLabel, "mediaItemsCountLabel")
-        if self.media_items_count_label is None:
+        media_items_count_label = ui_widget.findChild(QLabel, "mediaItemsCountLabel")
+        if media_items_count_label is None:
             raise RuntimeError("mediaItemsCountLabel not found in google_photos_view.ui")
+        self.media_items_count_label = cast(QLabel, media_items_count_label)
             
-        self.media_items_table = ui_widget.findChild(QTableWidget, "mediaItemsTable")
-        if self.media_items_table is None:
+        media_items_table = ui_widget.findChild(QTableWidget, "mediaItemsTable")
+        if media_items_table is None:
             raise RuntimeError("mediaItemsTable not found in google_photos_view.ui")
+        self.media_items_table = cast(QTableWidget, media_items_table)
         
         # Albums tab
-        self.albums_count_label = ui_widget.findChild(QLabel, "albumsCountLabel")
-        if self.albums_count_label is None:
+        albums_count_label = ui_widget.findChild(QLabel, "albumsCountLabel")
+        if albums_count_label is None:
             raise RuntimeError("albumsCountLabel not found in google_photos_view.ui")
+        self.albums_count_label = cast(QLabel, albums_count_label)
             
-        self.albums_table = ui_widget.findChild(QTableWidget, "albumsTable")
-        if self.albums_table is None:
+        albums_table = ui_widget.findChild(QTableWidget, "albumsTable")
+        if albums_table is None:
             raise RuntimeError("albumsTable not found in google_photos_view.ui")
+        self.albums_table = cast(QTableWidget, albums_table)
         
         # Shared Albums tab
-        self.shared_albums_count_label = ui_widget.findChild(QLabel, "sharedAlbumsCountLabel")
-        if self.shared_albums_count_label is None:
+        shared_albums_count_label = ui_widget.findChild(QLabel, "sharedAlbumsCountLabel")
+        if shared_albums_count_label is None:
             raise RuntimeError("sharedAlbumsCountLabel not found in google_photos_view.ui")
+        self.shared_albums_count_label = cast(QLabel, shared_albums_count_label)
             
-        self.shared_albums_table = ui_widget.findChild(QTableWidget, "sharedAlbumsTable")
-        if self.shared_albums_table is None:
+        shared_albums_table = ui_widget.findChild(QTableWidget, "sharedAlbumsTable")
+        if shared_albums_table is None:
             raise RuntimeError("sharedAlbumsTable not found in google_photos_view.ui")
+        self.shared_albums_table = cast(QTableWidget, shared_albums_table)
         
         # Details tab
-        self.details_text = ui_widget.findChild(QTextEdit, "detailsText")
-        if self.details_text is None:
+        details_text = ui_widget.findChild(QTextEdit, "detailsText")
+        if details_text is None:
             raise RuntimeError("detailsText not found in google_photos_view.ui")
+        self.details_text = cast(QTextEdit, details_text)
 
         # Connect signals
         self.authenticate_button.clicked.connect(self.on_authenticate)
@@ -253,6 +264,10 @@ class GooglePhotosView(QWidget):
             QMessageBox.information(self, "Loading", "Data is already being loaded. Please wait.")
             return
 
+        # Store client in local variable for type narrowing in nested function
+        client = self.client
+        assert client is not None  # Type narrowing
+
         # Create progress dialog
         progress_dialog = QProgressDialog("Loading data from Google Photos...", "Cancel", 0, 100, self)
         progress_dialog.setWindowTitle("Loading Google Photos Data")
@@ -272,19 +287,19 @@ class GooglePhotosView(QWidget):
             # Fetch media items (single page)
             ctx.progress(10, "Fetching media items...")
             ctx.check_cancelled()
-            media_response = self.client.list_media_items(page_size=100)
+            media_response = client.list_media_items(page_size=100)
             media_items = media_response.get("mediaItems", [])
             
             # Fetch albums (single page)
             ctx.progress(50, "Fetching albums...")
             ctx.check_cancelled()
-            albums_response = self.client.list_albums(page_size=50)
+            albums_response = client.list_albums(page_size=50)
             albums = albums_response.get("albums", [])
             
             # Fetch shared albums (single page)
             ctx.progress(90, "Fetching shared albums...")
             ctx.check_cancelled()
-            shared_albums_response = self.client.list_shared_albums(page_size=50)
+            shared_albums_response = client.list_shared_albums(page_size=50)
             shared_albums = shared_albums_response.get("sharedAlbums", [])
             
             ctx.progress(100, "Complete")

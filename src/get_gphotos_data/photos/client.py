@@ -100,11 +100,12 @@ class GooglePhotosClient:
             
             return response_json
         except requests.HTTPError as e:
+            # HTTPError is raised by raise_for_status(), so response should exist
             # Provide more detailed error information for 403 errors
-            if response.status_code == 403:
+            if e.response is not None and e.response.status_code == 403:
                 error_detail = ""
                 try:
-                    error_json = response.json()
+                    error_json = e.response.json()
                     error_detail = error_json.get("error", {}).get("message", "")
                     if error_detail:
                         error_detail = f"\nError details: {error_detail}"

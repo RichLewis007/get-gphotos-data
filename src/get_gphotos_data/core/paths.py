@@ -86,7 +86,7 @@ def app_executable_dir() -> Path:
     else:
         # Running as script
         main_module = sys.modules.get("__main__")
-        if main_module and hasattr(main_module, "__file__"):
+        if main_module and hasattr(main_module, "__file__") and main_module.__file__ is not None:
             script_dir = Path(main_module.__file__).parent
             
             # Check if we're running from a virtual environment (development mode)
