@@ -18,10 +18,11 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from ..core.paths import app_data_dir
 
 # Google Photos API scopes
-# Note: photoslibrary.readonly was deprecated March 31, 2025
-# Use photoslibrary.readonly.appcreateddata for reading app-created data
+# Note: photoslibrary.readonly was deprecated March 31, 2025, but still works
+# and is needed to access ALL photos (not just app-created data)
+# See local/scope-change-notes.md for details
 SCOPES = [
-    "https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata",
+    "https://www.googleapis.com/auth/photoslibrary.readonly",
 ]
 
 # Token file name (stored in app data directory)

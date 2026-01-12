@@ -26,11 +26,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..core.paths import app_executable_dir
+from ..core.paths import app_data_dir, app_executable_dir
 from ..core.ui_loader import load_ui
 from ..core.workers import WorkContext, WorkRequest, Worker, WorkerPool
 from ..photos.auth import GooglePhotosAuth
 from ..photos.client import GooglePhotosClient
+
+# Token file name (same as in auth.py)
+TOKEN_FILE = "google_photos_token.json"
 
 
 class GooglePhotosView(QWidget):
@@ -173,17 +176,37 @@ class GooglePhotosView(QWidget):
     def _try_load_credentials(self) -> None:
         """Try to load credentials.json from the program's directory.
         
-        If credentials.json is found, attempts to load and authenticate.
+        If credentials.json is found and a token file exists, attempts to authenticate automatically.
         If not found or authentication fails, enables the authenticate button.
         """
         app_dir = app_executable_dir()
         credentials_path = app_dir / "credentials.json"
+        token_path = app_data_dir() / TOKEN_FILE
         
         if credentials_path.exists():
             self.log.info("Found credentials.json in program directory: %s", credentials_path)
-            self.set_credentials_path(credentials_path)
-            # If authentication didn't succeed, ensure button is enabled
-            if self.client is None:
+            # Only auto-authenticate if a token file exists (user has authenticated before)
+            if token_path.exists():
+                try:
+                    # Create auth instance and attempt to authenticate
+                    self.auth = GooglePhotosAuth(credentials_path)
+                    # Try to authenticate (will load existing token and refresh if needed)
+                    credentials = self.auth.authenticate()
+                    # If we got here, authentication succeeded
+                    self.client = GooglePhotosClient(credentials, debug=self.debug_api)
+                    self._update_ui_state(True)
+                    self.log.info("Successfully authenticated with existing credentials")
+                except Exception as e:
+                    # Authentication failed - user may need to re-authenticate
+                    self.log.warning("Failed to authenticate automatically: %s", e)
+                    self.auth = GooglePhotosAuth(credentials_path)  # Keep auth instance for manual auth
+                    self.client = None
+                    self._update_ui_state(False)
+                    self.authenticate_button.setEnabled(True)
+            else:
+                # Credentials file exists but no token - user needs to authenticate for first time
+                self.log.info("credentials.json found but no token file - user needs to authenticate")
+                self.auth = GooglePhotosAuth(credentials_path)
                 self.authenticate_button.setEnabled(True)
         else:
             self.log.info("credentials.json not found in program directory: %s", app_dir)
