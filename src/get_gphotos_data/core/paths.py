@@ -74,20 +74,39 @@ def app_executable_dir() -> Path:
     
     For frozen executables (PyInstaller, etc.), returns the directory containing the executable.
     For scripts, returns the directory containing the main script.
+    For development (running from virtual environment), returns the project root.
     
     Returns:
-        Path to the application directory
+        Path to the application directory (project root in development)
     """
     import sys
     if getattr(sys, "frozen", False):
         # Running as compiled executable (PyInstaller, etc.)
         return Path(sys.executable).parent
     else:
-        # Running as script - return the directory of the main module
-        # This will be the project root when running from source
+        # Running as script
         main_module = sys.modules.get("__main__")
         if main_module and hasattr(main_module, "__file__"):
-            return Path(main_module.__file__).parent
+            script_dir = Path(main_module.__file__).parent
+            
+            # Check if we're running from a virtual environment (development mode)
+            # If the script is in .venv/bin, .env/bin, venv/bin, or env/bin, go up to project root
+            script_path_str = str(script_dir)
+            if any(venv_path in script_path_str for venv_path in [".venv/bin", ".env/bin", "venv/bin", "env/bin"]):
+                # Navigate from venv/bin to project root
+                # Find the project root by looking for pyproject.toml
+                current = script_dir
+                for _ in range(10):  # Limit search to avoid infinite loops
+                    if (current / "pyproject.toml").exists():
+                        return current
+                    parent = current.parent
+                    if parent == current:  # Reached filesystem root
+                        break
+                    current = parent
+                # If pyproject.toml not found, go up two levels from .venv/bin
+                return script_dir.parent.parent
+            
+            return script_dir
         # Fallback to current working directory
         return Path.cwd()
 
