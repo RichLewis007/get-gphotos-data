@@ -201,6 +201,39 @@
         color: #856404;
       }
 
+      .deprecation-notice {
+        background: #dc3545;
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin: 20px 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+
+      .deprecation-notice h2 {
+        color: white;
+        font-size: 2em;
+        margin-bottom: 15px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        padding-bottom: 15px;
+      }
+
+      .deprecation-notice p {
+        font-size: 1.1em;
+        margin: 10px 0;
+        line-height: 1.8;
+      }
+
+      .deprecation-notice a {
+        color: #ffd700;
+        text-decoration: underline;
+      }
+
+      .deprecation-notice a:hover {
+        color: #ffed4e;
+      }
+
       @media (max-width: 768px) {
         h1 {
           font-size: 2em;
@@ -240,6 +273,22 @@
       </header>
 
       <main>
+        <div class="deprecation-notice">
+          <h2>⚠️ DEPRECATED - NO LONGER FUNCTIONAL ⚠️</h2>
+          <p>
+            <strong>Google has ended support for the Google Photos Library API features which allow users to write programs to read or list their existing photos and videos.</strong>
+          </p>
+          <p>
+            As of March 31, 2025, Google deprecated the <code>photoslibrary.readonly</code> scope that provided access to all photos in a user's library. The Library API now only supports accessing photos and videos that were uploaded by your application (<code>photoslibrary.readonly.appcreateddata</code>), which means this program cannot function as intended.
+          </p>
+          <p>
+            <strong>This project is deprecated and no longer maintained.</strong>
+          </p>
+          <p>
+            For accessing photos from Google Photos, you would need to use the <a href="https://developers.google.com/photos/picker">Google Photos Picker API</a>, which requires users to manually select photos through a web interface rather than programmatically listing all photos.
+          </p>
+        </div>
+
         <section>
           <h2>Features</h2>
           <div class="features">
